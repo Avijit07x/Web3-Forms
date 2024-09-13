@@ -1,35 +1,71 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState } from "react";
 
-function App() {
-  const [count, setCount] = useState(0)
+const App = () => {
+	const [result, setResult] = useState("");
+	
 
-  return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
-}
+	const onSubmit = async (event) => {
+		event.preventDefault();
+		setResult("Sending....");
+		const formData = new FormData(event.target);
+    console.log(formData)
 
-export default App
+		formData.append("access_key", import.meta.env.VITE_ACCESS_KEY);
+
+		const response = await fetch("https://api.web3forms.com/submit", {
+			method: "POST",
+			body: formData,
+		});
+
+		const data = await response.json();
+
+		if (data.success) {
+			setResult("Form Submitted Successfully");
+			event.target.reset();
+		} else {
+			console.log("Error", data);
+			setResult(data.message);
+		}
+	};
+
+	return (
+		<div className="min-h-screen bg-gray-100 flex items-center justify-center">
+			<div className="max-w-md mx-auto p-6 bg-white rounded-lg shadow-md my-auto">
+				<h1 className="text-2xl font-bold mb-4 text-center">Web3 Form</h1>
+				<form onSubmit={onSubmit} className="space-y-4">
+					<input
+						placeholder="Your Name"
+						type="text"
+						name="name"
+						required
+						className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+					/>
+					<input
+						placeholder="Your Email"
+						type="email"
+						name="email"
+						required
+						className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+					/>
+					<textarea
+						placeholder="Your Message"
+						name="message"
+						required
+						className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+						rows="4"
+					></textarea>
+
+					<button
+						className="w-full p-3 bg-blue-500 text-white rounded transition-colors duration-300 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400"
+						type="submit"
+					>
+						Submit Form
+					</button>
+				</form>
+				<span className="block mt-4 text-center text-gray-600">{result}</span>
+			</div>
+		</div>
+	);
+};
+
+export default App;
